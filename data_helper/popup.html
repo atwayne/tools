@@ -1,0 +1,153 @@
+﻿<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="jquery-linedtextarea.js"></script>
+    <script type="text/javascript" src="vkbeautify.0.99.00.beta.js"></script>
+    <link rel="stylesheet" type="text/css" href="jquery-linedtextarea.css" />
+	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+    <title>Format data</title>
+    <style type="text/css">
+        .row
+        {
+            margin: 5px 0;
+            padding: 3px;
+        }
+        
+		.linedwrap{
+			margin-top: 2em;
+			margin-bottom: 1em;
+		}
+		
+        #Undo
+        {
+            float: right;
+        }
+    </style>
+    <script type="text/javascript">
+
+        function removeEmptyLine(str) {
+            return str.replace(/^\s*\n/gm, '');
+        }
+
+        function isSqlKeyword(str) {
+            return str.toUpperCase() === "NULL";
+        }
+
+        function generateInClause(str) {
+
+            var lines = str.split('\n');
+            return lines.map(function (element) {
+                return "'" + element + "',"
+            }).join('\n').replace(/,+$/, "");
+        }
+
+
+        function generateValuesClause(str) {
+            var lines = str.split('\n');
+
+            var result = lines.map(function (element) {
+                return "('" + element.replace(/\t/gm, "','") + "')";
+            }).join('\n');
+            return result;
+
+        }
+
+        function generateSelectClause(str) {
+            var lines = str.split('\n');
+
+            var result = lines.map(function (element) {
+                return '[' + element.replace(/\t/gm, "],[") + ']';
+            }).join('\n');
+            return result;
+        }
+		
+		function prettyJSON(str){
+			return JSON.stringify(JSON.parse(str), undefined, 4);
+		}
+		
+        function prettyXml(str) {
+            return vkbeautify.xml(str);
+        }
+
+        function prettySql(str) {
+            return vkbeautify.sql(str);
+        }
+
+        function applyAction(action) {
+            var content = $('#content').val();
+            var history = $('#content').data('history');
+            if (!history) {
+                history = new Array();
+            }
+
+            history.push(content);
+
+            if (history.length > 40) {
+                history = history.shift();
+            }
+
+            $('#content').data('history', history);
+
+            $('#content').val(action(content));
+        }
+
+        $(document).ready(function () {
+
+			
+            $('.edit').click(function (event) {
+
+                var $target = $(event.target);
+                var action = window[$target.attr('id')];
+                if (typeof action === "function")
+                    applyAction(action);
+            });
+
+            $('#Undo').click(function () {
+                var history = $('#content').data('history');
+                if (history) {
+                    var content = history.pop();
+                    $('#content').val(content);
+                }
+            });
+
+			$("#content").linedtextarea();
+
+        })
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="container">
+            <textarea rows="25" cols="160" id="content"></textarea>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <button id="removeEmptyLine" type="button" class="btn btn-default btn-lg edit">
+                    移除空行</button>
+                <button id="Undo" type="button" class="btn btn-default btn-lg">
+                    Undo</button>
+            </div>
+            <div class="row">
+                <button id="prettyXml" type="button" class="btn btn-default btn-lg edit">
+                    Format as XML</button>
+                <button id="prettySql" type="button" class="btn btn-default btn-lg edit hide">
+                    Format as SQL</button>
+				<button id="prettyJSON" type="button" class="btn btn-default btn-lg edit">
+                    Format as JSON</button>
+            </div>
+            <div class="row">
+                <button id="generateInClause" type="button" class="btn btn-default btn-lg edit">
+                    生成 IN 语句</button>
+                <button id="generateValuesClause" type="button" class="btn btn-default btn-lg edit">
+                    生成 VALUES 语句</button>
+                <button id="generateSelectClause" type="button" class="btn btn-default btn-lg edit">
+                    生成 SELECT 语句</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
