@@ -6,4 +6,4 @@ Now we have:
     [Live Demo](http://lastr2d2.github.io/tools/data_helper/popup.html)
 - Online Text Compare 
 
-    [Live Demo](lastr2d2.github.io/tools/jsdiff)
+    [Live Demo](http://lastr2d2.github.io/tools/jsdiff)
