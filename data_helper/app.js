@@ -53,6 +53,9 @@ var app = {
         removeEmptyLine: function (text) {
             return text.replace(/^\s*\n/gm, '');
         },
+        removeWhitespace: function(text) {
+            return text.replace(/\s/g,'');
+        },
         createSqlInClause: function (text) {
             var lines = text.split('\n');
             return lines.map(function (element) {
